@@ -58,20 +58,3 @@ resource "aws_secretsmanager_secret_version" "db_credentials_version" {
   })
 }
 
-resource "aws_iam_role_policy" "allow_secrets" {
-  name = "lambda-secrets-access"
-  role = data.aws_iam_role.lab_role.name
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ],
-        Effect   = "Allow",
-        Resource = aws_secretsmanager_secret.db_credentials.arn
-      }
-    ]
-  })
-}
