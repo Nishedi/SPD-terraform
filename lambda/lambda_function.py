@@ -23,7 +23,7 @@ def lambda_handler(event, context):
         sensor_id = body["sensor_id"]
         resistance = float(body["value"])
 	username, password = get_db_credentials()
-
+	print("✅ Sekret odczytany:", username, password)
         if resistance < 1 or resistance > 20000:
             x = mark_sensor_as_broken(sensor_id)
             return {
