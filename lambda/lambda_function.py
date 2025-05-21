@@ -11,12 +11,18 @@ sns = boto3.client("sns", region_name="us-east-1")
 s3 = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+def get_db_credentials():
+    client = boto3.client("secretsmanager")
+    response = client.get_secret_value(SecretId="my-database-credentials")
+    secret = json.loads(response["SecretString"])
+    return secret["username"], secret["password"]
 
 def lambda_handler(event, context):
     try:
         body = json.loads(event["body"]) if "body" in event else event
         sensor_id = body["sensor_id"]
         resistance = float(body["value"])
+	username, password = get_db_credentials()
 
         if resistance < 1 or resistance > 20000:
             x = mark_sensor_as_broken(sensor_id)

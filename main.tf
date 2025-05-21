@@ -45,3 +45,33 @@ resource "aws_dynamodb_table" "terraform_locks" {
     type = "S"
   }
 }
+
+resource "aws_secretsmanager_secret" "db_credentials" {
+  name = "my-database-credentials"
+}
+
+resource "aws_secretsmanager_secret_version" "db_credentials_version" {
+  secret_id     = aws_secretsmanager_secret.db_credentials.id
+  secret_string = jsonencode({
+    username = "admin"
+    password = "S3kre7neHasl0"
+  })
+}
+
+resource "aws_iam_role_policy" "allow_secrets" {
+  name = "lambda-secrets-access"
+  role = data.aws_iam_role.lab_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ],
+        Effect   = "Allow",
+        Resource = aws_secretsmanager_secret.db_credentials.arn
+      }
+    ]
+  })
+}
